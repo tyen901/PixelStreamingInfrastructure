@@ -828,4 +828,22 @@ export class PixelStreaming {
     public isReconnecting() {
         return this._webRtcController.isReconnecting;
     }
+
+    /**
+     * Sets the layer preferences for the player.
+     * @param playerId - The ID of the player.
+     * @param spatialLayer - The spatial layer preference.
+     * @param temporalLayer - The temporal layer preference.
+     */
+    setLayerPreferences(playerId: string = '0', spatialLayer: number, temporalLayer: number): void {
+        const layerPreferenceMessage = {
+            type: 'layerPreference',
+            spatialLayer,
+            temporalLayer,
+            playerId
+        };
+        // log the event
+        Logger.Info(`Sending layer preference message: ${JSON.stringify(layerPreferenceMessage)}`);
+        this.signallingProtocol.sendMessage(layerPreferenceMessage);
+    }
 }

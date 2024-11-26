@@ -112,6 +112,7 @@ export class Application {
         if (isPanelEnabled(options.statsPanelConfig)) {
             // Add stats panel
             this.statsPanel = new StatsPanel();
+            this.statsPanel.stream = this.stream;
             this.uiFeaturesElement.appendChild(this.statsPanel.rootElement);
         }
 
@@ -256,6 +257,24 @@ export class Application {
             commandsSectionElem.appendChild(showFPSButton.rootElement);
             commandsSectionElem.appendChild(requestKeyframeButton.rootElement);
             commandsSectionElem.appendChild(restartStreamButton.rootElement);
+
+            // Add buttons for setting layer preference
+            const setLayerPreferenceButton = (spatialLayer: number, temporalLayer: number, label: string) => {
+            const button = new LabelledButton(label, 'Set');
+            button.addOnClickListener(() => {
+                this.stream.setLayerPreferences("0", spatialLayer, temporalLayer);
+            });
+            return button;
+            };
+
+            const layerPreferenceSectionElem = this.configUI.buildSectionWithHeading(
+            this.settingsPanel.settingsContentElement,
+            'Layer Preferences'
+            );
+
+            layerPreferenceSectionElem.appendChild(setLayerPreferenceButton(0, 0, '[0] Low').rootElement);
+            layerPreferenceSectionElem.appendChild(setLayerPreferenceButton(1, 0, '[1] Medium ').rootElement);
+            layerPreferenceSectionElem.appendChild(setLayerPreferenceButton(2, 0, '[2] High').rootElement);
         }
     }
 

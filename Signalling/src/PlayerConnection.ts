@@ -94,6 +94,20 @@ export class PlayerConnection implements IPlayer, LogUtils.IMessageLogger {
         };
     }
 
+    /**
+     * Sets the layer preferences for the player.
+     * @param spatialLayer - The spatial layer preference.
+     * @param temporalLayer - The temporal layer preference.
+     */
+    setLayerPreferences(spatialLayer: number, temporalLayer: number): void {
+        const layerPreferenceMessage = MessageHelpers.createMessage(Messages.layerPreference, {
+            spatialLayer,
+            temporalLayer,
+            playerId: this.playerId
+        });
+        this.sendToStreamer(layerPreferenceMessage);
+    }
+
     private registerMessageHandlers(): void {
         /* eslint-disable @typescript-eslint/unbound-method */
         this.protocol.on(

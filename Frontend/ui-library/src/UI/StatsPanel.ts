@@ -10,6 +10,7 @@ import {
 import { AggregatedStats } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
 import { MathUtils } from '../Util/MathUtils';
 import { DataChannelLatencyTest } from './DataChannelLatencyTest';
+import { LabelledButton } from './LabelledButton';
 
 /**
  * A stat structure, an id, the stat string, and the element where it is rendered.
@@ -36,6 +37,8 @@ export class StatsPanel {
 
     /* A map stats we are storing/rendering */
     statsMap = new Map<string, Stat>();
+
+    stream: PixelStreaming;
 
     constructor() {
         this.latencyTest = new LatencyTest();
@@ -90,6 +93,61 @@ export class StatsPanel {
 
             const sessionStats = document.createElement('div');
             sessionStats.innerHTML = 'Session Stats';
+
+            // Create numeral box for setting values
+            const createNumeralBox = () => {
+                const container = document.createElement('div');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '0';
+                input.max = '10';
+                input.value = '0';
+                input.addEventListener('change', () => {
+                    const value = Math.max(0, Math.min(10, Number(input.value)));
+                    input.value = value.toString();
+                    // Send event with the new value
+                    if (!this.stream) {
+                        Logger.Error('Stream not initialized');
+                        return;
+                    }
+                    this.stream.setLayerPreferences("0", value, 0); // Assuming temporal layer is 0
+                });
+                container.appendChild(input);
+                return { container, input };
+            };
+
+            const numeralBox = createNumeralBox();
+
+            // Create buttons for setting spatial value
+            const createSpatialButtons = () => {
+                const container = document.createElement('div');
+                [0, 1, 2, 3].forEach(value => {
+                    const button = new LabelledButton(`Set Spatial ${value}`, `Set Spatial ${value}`);
+                    button.addOnClickListener(() => {
+                        if (!this.stream) {
+                            Logger.Error('Stream not initialized');
+                            return;
+                        }
+                        this.stream.setLayerPreferences("0", value, 0); // Assuming temporal layer is 0
+                        numeralBox.input.value = value.toString();
+                    });
+                    container.appendChild(button.rootElement);
+                });
+                return container;
+            };
+
+            const numeralBoxSection = document.createElement('div');
+            numeralBoxSection.classList.add('settingsContainer');
+            numeralBoxSection.appendChild(document.createElement('h3')).textContent = 'Spatial Layer';
+            numeralBoxSection.appendChild(numeralBox.container);
+
+            const spatialButtonsSection = document.createElement('div');
+            spatialButtonsSection.classList.add('settingsContainer');
+            spatialButtonsSection.appendChild(document.createElement('h3')).textContent = 'Spatial Buttons';
+            spatialButtonsSection.appendChild(createSpatialButtons());
+
+            this._statsContentElement.appendChild(numeralBoxSection);
+            this._statsContentElement.appendChild(spatialButtonsSection);
 
             this._statsContentElement.appendChild(streamToolStats);
             streamToolStats.appendChild(controlStats);
